@@ -1,0 +1,24 @@
+public class MaximumValue {
+    public static int findMax(int[] arr, int low, int high) {
+        // Base case: If the list has only one element
+        if (low == high) {
+            return arr[low];
+        }
+
+        // Find the middle index
+        int mid = low + (high - low) / 2;
+
+        // Recursively find the maximum in both halves
+        int leftMax = findMax(arr, low, mid);
+        int rightMax = findMax(arr, mid + 1, high);
+
+        // Return the maximum of the two halves
+        return Math.max(leftMax, rightMax);
+    }
+
+    public static void main(String[] args) {
+        int[] arr = {2, 5, 8, 12, 16, 23, 38, 56, 72, 91};
+        int max = findMax(arr, 0, arr.length - 1);
+        System.out.println("Maximum value: " + max);
+    }
+}
