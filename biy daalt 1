@@ -1,0 +1,110 @@
+!pip install spylls
+!pip install pyspellchecker
+
+import re
+from collections import Counter
+import tensorflow as tf
+import numpy as np
+from spylls.hunspell import Dictionary
+from spellchecker import SpellChecker
+
+# COMMON_WORDS жагсаалт
+COMMON_WORDS = {"юм", "нь", "ба", "болон", "байна", "гэх", "бол"}
+
+# Dummy classifier: Replace with your TensorFlow model and tokenizer
+def load_dummy_model():
+    model = tf.keras.Sequential([
+        tf.keras.layers.Embedding(input_dim=10000, output_dim=64),
+        tf.keras.layers.GlobalAveragePooling1D(),
+        tf.keras.layers.Dense(4, activation='softmax')  # Economic, Sports, Literature, Politics
+    ])
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    return model
+
+model = load_dummy_model()
+
+def classify_text(text):
+    if "спорт" in text.lower():
+        return 1, "Спорт"
+    elif "уран зохиол" in text.lower():
+        return 2, "Уран зохиол"
+    elif "эдийн засаг" in text.lower():
+        return 0, "Эдийн засаг"
+    elif "улс төр" in text.lower():
+        return 4, "Улс төр"
+    else:
+        return 3, "Бусад"
+
+def clean_text(text):
+    return re.sub(r"[^\u0400-\u04FF\s]", "", text)  # Кирилл үсэг болон зайг үлдээх
+
+# PySpellChecker ашиглах
+spell_checker = SpellChecker(language=None)
+spell_checker.word_frequency.load_text_file('/content/mn_MN.dic')
+
+def check_spelling(word):
+    """Check spelling using PySpellChecker"""
+    if word in spell_checker:
+        return True, []
+    else:
+        suggestions = spell_checker.candidates(word)
+        return False, suggestions
+
+def extract_root_words(text):
+    words = clean_text(text).split()
+    root_words = []
+    misspelled = {}
+
+    for word in words:
+        is_correct, suggestions = check_spelling(word)
+        root_words.append(word)
+        if not is_correct:
+            misspelled[word] = suggestions
+
+    return root_words, misspelled
+
+def process_text(text):
+    root_words, misspelled = extract_root_words(text)
+    word_counts = Counter(root_words)
+    filtered_words = {word: count for word, count in word_counts.items() if word not in COMMON_WORDS}
+    top_words = sorted(filtered_words.items(), key=lambda x: x[1], reverse=True)[:10]
+    classification_id, category = classify_text(text)
+
+    return {
+        "misspelled": misspelled,
+        "unique_words": len(set(root_words)),
+        "top_words": top_words,
+        "classification": category
+    }
+
+# Input text
+text = """
+Хүй нэгдлийн нийгэмд эдийн засгийн хөгжлийн түвшин доогуур байсан нь хэрэглээ зөвхөн хүний амь зууж оршин тогтнохын төлөө тэмцлийн хэмжээнд байв. Анх эртний хүмүүс ан агнах, жимс, ногоо цуглуулах төдийхөнөөр амьжиргаагаа залгуулж байсан бол шинэ дэвшилтэд чулуун зэвсгийн хувьсгалын үр дүнд газар тариалан, мал аж ахуй үүссэн байна. Нийгмийн хөгжил нь хөдөлмөрийн хувиарлалтад хүргэсэн - газар тариалангийн болон бэлчээрийн мал аж ахуйн овог аймгууд бий болж, гар урчууд гарч ирсэн бөгөөд тэдний анхных нь дархчууд байжээ. Улмаар нийгмийн тэгш бус байдал үүсч, нийгмийн давхарга, төр бий болсон бөгөөд боолчлолын буюу хамжилгат нийгэм үүссэн байна. Бараа солилцоо (бартер) аажмаар хөгжиж байгаад мөнгө гарч ирснээр худалдаа арилжаа болж хувирсан байна.
+"""
+def process_text(text):
+    root_words, misspelled = extract_root_words(text)
+    word_counts = Counter(root_words)
+    filtered_words = {word: count for word, count in word_counts.items() if word not in COMMON_WORDS}
+    top_words = sorted(filtered_words.items(), key=lambda x: x[1], reverse=True)[:10]
+    classification_id, category = classify_text(text)
+
+    return {
+        "misspelled": misspelled,
+        "unique_words": len(set(root_words)),
+        "top_words": top_words,
+        "classification": category
+    }
+
+# Тест текстийн үр дүнг хэвлэх
+print("Misspelled Words with Suggestions:")
+for word, suggestions in result["misspelled"].items():
+    # `None` утгыг хоосон жагсаалт болгон хөрвүүлнэ
+    suggestions_list = suggestions if suggestions is not None else []
+    print(f" - {word}: {', '.join(suggestions_list)}")
+
+print("\nTotal Unique Words:", result["unique_words"])
+print("\nTop 10 Frequent Words (Excluding Common Words):")
+for word, count in result["top_words"]:
+    print(f" - {word}: {count}")
+
+print("\nText Category:", result["classification"])
