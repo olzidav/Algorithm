@@ -1,0 +1,43 @@
+class Solution(object):
+    def checkValidString(self, s):
+        """
+        :type s: str
+        :rtype: bool
+        """
+        n = len(s)
+        dp = [[False] * n for _ in range(n)]
+        
+   
+        for i in range(n):
+            if s[i] == '*':
+                dp[i][i] = True
+        
+      
+        for i in range(n - 1):
+            if s[i] == '(' and (s[i + 1] == ')' or s[i + 1] == '*'):
+                dp[i][i + 1] = True
+            if s[i] == '*' and (s[i + 1] == ')' or s[i + 1] == '*'):
+                dp[i][i + 1] = True
+        
+        
+        for length in range(2, n):
+            for i in range(n - length):
+                j = i + length
+                if (s[i] == '(' or s[i] == '*') and (s[j] == ')' or s[j] == '*'):
+                    dp[i][j] = dp[i + 1][j - 1]  
+                
+               
+                for k in range(i, j):
+                    if dp[i][k] and dp[k + 1][j]:
+                        dp[i][j] = True
+                        break
+        
+        return dp[0][n - 1]
+
+
+solution = Solution()
+print(solution.checkValidString("()"))     
+print(solution.checkValidString("(*)"))    
+print(solution.checkValidString("(*))"))  
+print(solution.checkValidString("((*)"))   
+print(solution.checkValidString("(*)))")) 
