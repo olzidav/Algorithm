@@ -1,0 +1,28 @@
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class MaximumValueTest {
+    @Test
+    public void testEmptyArray() {
+        int[] arr = {};
+        assertThrows(ArrayIndexOutOfBoundsException.class, () -> MaximumValue.findMax(arr, 0, arr.length - 1));
+    }
+
+    @Test
+    public void testSingleElementArray() {
+        int[] arr = {5};
+        assertEquals(5, MaximumValue.findMax(arr, 0, arr.length - 1));
+    }
+
+    @Test
+    public void testMultipleElementsArray() {
+        int[] arr = {2, 5, 8, 12, 16, 23, 38, 56, 72, 91};
+        assertEquals(91, MaximumValue.findMax(arr, 0, arr.length - 1));
+    }
+
+    @Test
+    public void testNegativeNumbers() {
+        int[] arr = {-2, -5, -8, -12, -16, -23, -38, -56, -72, -91};
+        assertEquals(-2, MaximumValue.findMax(arr, 0, arr.length - 1));
+    }
+}
