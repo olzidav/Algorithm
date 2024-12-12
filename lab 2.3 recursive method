@@ -1,0 +1,49 @@
+import unittest
+def binary_search(arr, target, low, high):
+    if high >= low:
+        mid = (high + low) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] > target:
+            return binary_search(arr, target, low, mid - 1)
+        else:
+            return binary_search(arr, target, mid + 1, high)
+    else:
+        return -1
+
+# Function to call binary search
+def binary_search_wrapper(arr, target):
+    return binary_search(arr, target, 0, len(arr) - 1)
+
+
+class TestBinarySearch(unittest.TestCase):
+    def test_empty_array(self):
+        arr = []
+        target = 5
+        result = binary_search_wrapper(arr, target)
+        self.assertEqual(result, -1)
+
+    def test_single_element_array(self):
+        arr = [5]
+        target = 5
+        result = binary_search_wrapper(arr, target)
+        self.assertEqual(result, 0)
+
+    def test_multiple_elements_array(self):
+        arr = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]
+        target = 23
+        result = binary_search_wrapper(arr, target)
+        self.assertEqual(result, 5)
+
+    def test_element_not_found(self):
+        arr = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]
+        target = 10
+        result = binary_search_wrapper(arr, target)
+        self.assertEqual(result, -1)
+
+if __name__ == '__main__':
+    unittest.main()
+
+
+
+    
