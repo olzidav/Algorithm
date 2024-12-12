@@ -1,0 +1,52 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class TestReadFile {
+
+    @Test
+    public void testFileExists() throws IOException {
+        String filename = "test_file.txt";
+        String expectedContent = "Test content";
+
+        // Create a temporary file and write content to it
+        Files.write(Paths.get(filename), expectedContent.getBytes());
+
+        String actualContent = readTextFile(filename);
+        assertEquals(expectedContent, actualContent);
+
+        // Delete the temporary file
+        Files.deleteIfExists(Paths.get(filename));
+    }
+
+    @Test
+    public void testFileNotFound() {
+        String filename = "nonexistent_file.txt";
+        String expectedErrorMessage = "File not found: " + filename;
+        String actualErrorMessage = null;
+
+        try {
+            readTextFile(filename);
+        } catch (IOException e) {
+            actualErrorMessage = e.getMessage();
+        }
+
+        assertEquals(expectedErrorMessage, actualErrorMessage);
+    }
+
+    public static String readTextFile(String filename) throws IOException {
+        StringBuilder content = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line).append("\n");
+            }
+        }
+        return content.toString();
+    }
+}
