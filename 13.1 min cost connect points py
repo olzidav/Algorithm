@@ -1,0 +1,35 @@
+import heapq
+
+class Solution(object):
+    def minCostConnectPoints(self, points):
+        """
+        :type points: List[List[int]]
+        :rtype: int
+        """
+        n = len(points)
+        if n <= 1:
+            return 0
+        
+        min_heap = [(0, 0)]  
+        visited = [False] * n
+        total_cost = 0
+        edges_used = 0
+        
+        while min_heap:
+            cost, point = heapq.heappop(min_heap)
+            
+            if visited[point]:
+                continue
+            visited[point] = True
+            total_cost += cost
+            edges_used += 1
+            
+            if edges_used == n:
+                break
+            
+            for i in range(n):
+                if not visited[i]:
+                    manhattan_dist = abs(points[point][0] - points[i][0]) + abs(points[point][1] - points[i][1])
+                    heapq.heappush(min_heap, (manhattan_dist, i))
+        
+        return total_cost
