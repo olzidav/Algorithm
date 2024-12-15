@@ -1,0 +1,32 @@
+class Solution(object):
+    def canFinish(self, numCourses, prerequisites):
+        """
+        :type numCourses: int
+        :type prerequisites: List[List[int]]
+        :rtype: bool
+        """
+        graph = [[] for _ in range(numCourses)]
+        for dest, src in prerequisites:
+            graph[src].append(dest)
+        
+        visited = [0] * numCourses  
+        
+        def dfs(course):
+            if visited[course] == 1:
+                return True 
+            if visited[course] == 2:
+                return False  
+            
+            visited[course] = 1 
+            for next_course in graph[course]:
+                if dfs(next_course):
+                    return True
+            visited[course] = 2 
+                    return False
+        
+        for i in range(numCourses):
+            if visited[i] == 0:
+                if dfs(i):
+                    return False  
+        
+        return True 
