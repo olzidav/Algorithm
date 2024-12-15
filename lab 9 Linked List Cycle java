@@ -1,22 +1,22 @@
 public class Solution {
     public boolean hasCycle(ListNode head) {
-        // Handle edge case: empty list or single node with no cycle
+     
         if (head == null || head.next == null) {
             return false;
         }
 
-        ListNode slow = head; // Slow pointer
-        ListNode fast = head; // Fast pointer
+        ListNode slow = head; 
+        ListNode fast = head; 
 
         while (fast != null && fast.next != null) {
-            slow = slow.next;           // Move slow pointer one step
-            fast = fast.next.next;      // Move fast pointer two steps
-            
-            if (slow == fast) {         // Check if pointers meet
+            slow = slow.next;           
+            fast = fast.next.next;      
+
+            if (slow == fast) {         
                 return true;
             }
         }
 
-        return false; // If fast pointer reaches null, no cycle
+        return false; 
     }
 }
