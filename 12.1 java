@@ -1,0 +1,48 @@
+import java.util.*;
+
+public class Solution {
+    public List<Integer> topologicalSort(int V, List<List<Integer>> graph) {
+        boolean[] visited = new boolean[V];
+        List<Integer> result = new ArrayList<>();
+
+     
+        void dfs(int v) {
+            visited[v] = true;
+            for (int neighbor : graph.get(v)) {
+                if (!visited[neighbor]) {
+                    dfs(neighbor);
+                }
+            }
+            result.add(v);  
+        }
+
+
+        for (int i = 0; i < V; i++) {
+            if (!visited[i]) {
+                dfs(i);
+            }
+        }
+
+
+        Collections.reverse(result);
+        return result;
+    }
+
+    public static void main(String[] args) {
+        Solution sol = new Solution();
+        List<List<Integer>> graph = new ArrayList<>();
+        
+        for (int i = 0; i < 6; i++) {
+            graph.add(new ArrayList<>());
+        }
+        
+        graph.get(2).add(3);
+        graph.get(3).add(1);
+        graph.get(4).add(0);
+        graph.get(4).add(1);
+        graph.get(5).add(0);
+        graph.get(5).add(2);
+        
+        System.out.println(sol.topologicalSort(6, graph));
+    }
+}
