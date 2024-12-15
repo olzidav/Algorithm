@@ -1,0 +1,117 @@
+
+import re
+from collections import Counter
+from spylls.hunspell import Dictionary
+
+
+MN_DICT_PATH = "/content/mn_MN"  
+
+try:
+    dic = Dictionary.from_files(MN_DICT_PATH)
+except ValueError as e:
+    print(f"Алдаа үгийн санг ачаалах явцад: {e}")
+    print("Aff файлын бүтэц болон дутуу мэдээллийг шалгана уу.")
+    dic = None  
+
+
+COMMON_WORDS = {"юм", "нь", "ба", "болон", "байна", "гэх", "бол", "тэр"}
+
+
+def clean_text(text):
+    return re.sub(r"[^\u0400-\u04FF\s]", "", text).strip()
+
+
+def check_spelling(word):
+    if dic and dic.lookup(word):
+        return True, []
+    elif dic:
+
+        suggestions = [str(suggestion) for suggestion in dic.suggest(word)]
+        return False, suggestions
+    else:
+        return True, []  
+
+
+
+def extract_root_words(text):
+    text = clean_text(text)
+    words = text.split()
+    root_words = []
+    misspelled = {}
+
+    for word in words:
+        is_correct, suggestions = check_spelling(word)
+        root_words.append(word)
+        if not is_correct:
+            misspelled[word] = suggestions
+
+    return root_words, misspelled
+
+
+def classify_text(words):
+    categories = {
+        "Эдийн засаг": {"мөнгө", "эдийн", "засаг", "арилжаа"},
+        "Спорт": {"тэмцээн", "спорт", "тамирчин", "уур"},
+        "Уран зохиол": {"зохиол", "ном", "түүх", "уран"},
+        "Улс төр": {"төр", "улс", "дарга", "засаг"},
+    }
+
+    category_counts = {key: 0 for key in categories}
+
+    for word in words:
+        for category, keywords in categories.items():
+            if word in keywords:
+                category_counts[category] += 1
+
+    classification = max(category_counts, key=category_counts.get)
+    return classification
+
+
+def process_text(text):
+    root_words, misspelled = extract_root_words(text)
+
+  
+    word_counts = Counter(root_words)
+    filtered_words = {
+        word: count for word, count in word_counts.items() if word not in COMMON_WORDS
+    }
+
+    
+    top_words = sorted(filtered_words.items(), key=lambda x: x[1], reverse=True)[:10]
+
+    
+    category = classify_text(filtered_words.keys())
+
+    return {
+        "misspelled": misspelled,
+        "unique_words": len(set(root_words)),
+        "top_words": top_words,
+        "classification": category,
+    }
+
+
+text = """
+Богдхан уулыг нүхлэх тендерийг цуцлахыг шаардав
+Богдхан уулыг нүхлэх тендерийг цуцлахыг шаардав
+УИХ-ын гишүүн А.Ундармаа  Зам тээврийн яамнаас өнгөрсөн арваннэгдүгээр сарын 11-нд зарласан 55 тэрбум 300 сая төгрөгийн өртөг бүхий “ Хөшигийн хөндий туннел” төслийн урьдчилсан ТЭЗҮ, зураг төсөл шалгаруулах тендерийг цуцлахыг шаардаад байна. Тэрбээр тус тендерийг цуцлах шаардлагатайг сануулсан хэд, хэдэн
+4 цагийн өмнө
+Н.Энхбаяр: Монгол голланд өвчин туссан нь улам хүндэрчихээд байна
+Н.Энхбаяр: Монгол голланд өвчин туссан нь улам хүндэрчихээд байна
+Мөн Евроазийн холбоотой түр худалдааны гэрээ нь Монгол Улсад хэр ашигтай вэ асуудлаар эдийн засагчид болон үйлдвэрлэгчдийн байр суурийг сонссоноо хүргэж байна.
+7 цагийн өмнө
+Богдхан уулыг нүхлэх тендерийг цуцлахыг шаардав
+Богдхан уулыг нүхлэх тендерийг цуцлахыг шаардав
+УИХ-ын гишүүн А.Ундармаа  Зам тээврийн яамнаас өнгөрсөн арваннэгдүгээр сарын 11-нд зарласан 55 тэрбум 300 сая төгрөгийн өртөг бүхий “ Хөшигийн хөндий туннел” төслийн урьдчилсан ТЭЗҮ, зураг төсөл шалгаруулах тендерийг цуцлахыг шаардаад байна. Тэрбээр тус тендерийг цуцлах шаардлагатайг сануулсан хэд, хэдэн"""
+
+result = process_text(text)
+
+print("\nMisspelled Words with Suggestions:")
+for word, suggestions in result["misspelled"].items():
+    print(f" - {word}: {', '.join(suggestions)}")
+
+print("\nTotal Unique Words:", result["unique_words"])
+print("\nTop 10 Frequent Words (Excluding Common Words):")
+for word, count in result["top_words"]:
+    print(f" - {word}: {count}")
+
+print("\nText Category:", result["classification"])
