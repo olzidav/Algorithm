@@ -1,0 +1,43 @@
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class FractionalKnapsackTest {
+
+    @Test
+    public void testFractionalKnapsack() {
+     
+        FractionalKnapsack.Item[] items1 = {
+                new FractionalKnapsack.Item(60, 10),
+                new FractionalKnapsack.Item(100, 20),
+                new FractionalKnapsack.Item(120, 30)
+        };
+
+        FractionalKnapsack.Item[] items2 = {
+                new FractionalKnapsack.Item(10, 5),
+                new FractionalKnapsack.Item(20, 10),
+                new FractionalKnapsack.Item(30, 15)
+        };
+        int W2 = 30;
+        double result2 = FractionalKnapsack.fractionalKnapsack(W2, items2);
+        assertEquals(60.0, result2, 0.001);
+
+   
+        FractionalKnapsack.Item[] items3 = {
+                new FractionalKnapsack.Item(70, 50),
+                new FractionalKnapsack.Item(50, 30),
+                new FractionalKnapsack.Item(60, 20)
+        };
+        int W3 = 40;
+        double result3 = FractionalKnapsack.fractionalKnapsack(W3, items3);
+        assertEquals(110.0, result3, 0.001);
+
+ 
+        FractionalKnapsack.Item[] items4 = {
+                new FractionalKnapsack.Item(100, 50),
+                new FractionalKnapsack.Item(200, 80),
+        };
+        int W4 = 0;
+        double result4 = FractionalKnapsack.fractionalKnapsack(W4, items4);
+        assertEquals(0.0, result4, 0.001);
+    }
+}
