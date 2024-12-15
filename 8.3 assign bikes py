@@ -1,0 +1,22 @@
+def assignBikes(workers, bikes):
+    n, m = len(workers), len(bikes)
+  
+    distances = []
+    for i in range(n):
+        for j in range(m):
+            distance = abs(workers[i][0] - bikes[j][0]) + abs(workers[i][1] - bikes[j][1])
+            distances.append((distance, i, j))  
+
+
+    distances.sort()
+
+    assigned = [-1] * n 
+    bike_taken = [False] * m 
+
+
+    for dist, worker, bike in distances:
+        if assigned[worker] == -1 and not bike_taken[bike]:
+            assigned[worker] = bike
+            bike_taken[bike] = True
+
+    return assigned
